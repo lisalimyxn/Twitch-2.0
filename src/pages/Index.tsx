@@ -1,80 +1,90 @@
 import { useState } from "react";
-import { ShoppingCart, Monitor, Shield, Play } from "lucide-react";
-import ViewerFlow from "@/components/flows/ViewerFlow";
+import TwitchTopNav from "@/components/TwitchTopNav";
+import TwitchSidebar from "@/components/TwitchSidebar";
+import BrowsePage from "@/components/BrowsePage";
+import StreamPage from "@/components/StreamPage";
 import CreatorFlow from "@/components/flows/CreatorFlow";
 import SafeguardsFlow from "@/components/flows/SafeguardsFlow";
 
-type Flow = "home" | "viewer" | "creator" | "safeguards";
+type Page = "browse" | "stream" | "creator" | "safeguards" | "viewer";
 
 const Index = () => {
-  const [flow, setFlow] = useState<Flow>("home");
+  const [page, setPage] = useState<Page>("browse");
+  const [activeChannel, setActiveChannel] = useState("GamerStreamer_Pro");
 
-  if (flow === "viewer") return (
-    <div className="h-screen flex flex-col">
-      <FlowHeader onBack={() => setFlow("home")} title="Flow 1: Viewer Experience" />
-      <div className="flex-1 overflow-hidden"><ViewerFlow /></div>
-    </div>
-  );
-  if (flow === "creator") return (
-    <div className="h-screen flex flex-col">
-      <FlowHeader onBack={() => setFlow("home")} title="Flow 2: Creator Experience" />
-      <div className="flex-1 overflow-hidden"><CreatorFlow /></div>
-    </div>
-  );
-  if (flow === "safeguards") return (
-    <div className="h-screen flex flex-col">
-      <FlowHeader onBack={() => setFlow("home")} title="Flow 3: Safeguards" />
-      <div className="flex-1 overflow-hidden"><SafeguardsFlow /></div>
-    </div>
-  );
+  const handleNavigate = (target: string) => {
+    if (target === "home" || target === "browse") setPage("browse");
+    else if (target === "viewer") {
+      setActiveChannel("GamerStreamer_Pro");
+      setPage("stream");
+    }
+  };
+
+  const handleWatchStream = (channelName: string) => {
+    setActiveChannel(channelName);
+    setPage("stream");
+  };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-8">
-      <div className="max-w-3xl w-full text-center space-y-8">
-        <div className="space-y-3">
-          <div className="flex items-center justify-center gap-3">
-            <svg viewBox="0 0 40 40" className="w-10 h-10 text-twitch-purple" fill="currentColor">
-              <path d="M5.7 0L1.4 10.985V34.314h9.7v5.686h5.7L22.6 34.314h7.1l9.7-10.985V0H5.7zM8.6 2.857h27.4v17.143l-5.7 5.714h-8.6l-5.7 5.714v-5.714H8.6V2.857zM17.2 8.57h2.9v8.572h-2.9V8.57zm8.6 0h2.9v8.572h-2.9V8.57z" />
-            </svg>
-            <span className="text-3xl font-bold">×</span>
-            <span className="text-amazon-orange text-3xl font-extrabold">amazon</span>
-          </div>
-          <h1 className="text-foreground text-4xl font-extrabold">Twitch Live Commerce</h1>
-          <p className="text-muted-foreground text-lg max-w-xl mx-auto">
-            Seamless in-stream shopping powered by Amazon Pay. 3 taps, under 10 seconds, without ever leaving the stream.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-3 gap-4">
-          {[
-            { key: "viewer" as Flow, icon: Play, title: "Viewer Experience", desc: "What viewers see when a creator sells a product", screens: "6 screens" },
-            { key: "creator" as Flow, icon: Monitor, title: "Creator Experience", desc: "How creators manage commerce in their dashboard", screens: "6 screens" },
-            { key: "safeguards" as Flow, icon: Shield, title: "Safeguards", desc: "Opt-in controls proving commerce is non-intrusive", screens: "4 screens" },
-          ].map((f) => (
+    <div className="h-screen flex flex-col bg-background">
+      <TwitchTopNav onNavigate={handleNavigate} currentPage={page === "browse" ? "browse" : page === "stream" ? "viewer" : undefined} />
+      <div className="flex flex-1 overflow-hidden">
+        <TwitchSidebar />
+        <div className="flex-1 flex flex-col overflow-hidden">
+          {/* Sub-nav for flows */}
+          <div className="bg-twitch-panel/60 border-b border-border px-4 py-1.5 flex items-center gap-1 text-xs">
             <button
-              key={f.key}
-              onClick={() => setFlow(f.key)}
-              className="bg-twitch-panel border border-border rounded-xl p-6 text-left hover:border-twitch-purple transition-all group"
+              onClick={() => setPage("browse")}
+              className={`px-3 py-1 rounded font-semibold transition-colors ${page === "browse" ? "bg-twitch-purple text-primary-foreground" : "text-muted-foreground hover:text-foreground hover:bg-secondary"}`}
             >
-              <f.icon className="w-8 h-8 text-twitch-purple mb-3 group-hover:scale-110 transition-transform" />
-              <h3 className="text-foreground font-bold text-lg">{f.title}</h3>
-              <p className="text-muted-foreground text-sm mt-1">{f.desc}</p>
-              <span className="inline-block mt-3 text-twitch-purple text-xs font-semibold bg-twitch-purple/10 px-2 py-1 rounded">{f.screens}</span>
+              🏠 Browse
             </button>
-          ))}
-        </div>
+            <button
+              onClick={() => { setActiveChannel("GamerStreamer_Pro"); setPage("stream"); }}
+              className={`px-3 py-1 rounded font-semibold transition-colors ${page === "stream" ? "bg-twitch-purple text-primary-foreground" : "text-muted-foreground hover:text-foreground hover:bg-secondary"}`}
+            >
+              🎮 Viewer Flow
+            </button>
+            <button
+              onClick={() => setPage("creator")}
+              className={`px-3 py-1 rounded font-semibold transition-colors ${page === "creator" ? "bg-twitch-purple text-primary-foreground" : "text-muted-foreground hover:text-foreground hover:bg-secondary"}`}
+            >
+              📊 Creator Dashboard
+            </button>
+            <button
+              onClick={() => setPage("safeguards")}
+              className={`px-3 py-1 rounded font-semibold transition-colors ${page === "safeguards" ? "bg-twitch-purple text-primary-foreground" : "text-muted-foreground hover:text-foreground hover:bg-secondary"}`}
+            >
+              🛡️ Safeguards
+            </button>
+          </div>
 
-        <p className="text-muted-foreground text-xs">Digital Business, Technology & Transformation • Interactive Prototype</p>
+          {/* Main content */}
+          {page === "browse" && <BrowsePage onWatchStream={handleWatchStream} />}
+          {page === "stream" && (
+            <StreamPage
+              channelName={activeChannel}
+              onBack={() => setPage("browse")}
+              hasCommerce={["GamerStreamer_Pro", "TechReviewer", "ArtistLive", "FashionFwd"].includes(activeChannel)}
+            />
+          )}
+          {page === "creator" && <CreatorFlow />}
+          {page === "safeguards" && <SafeguardsFlow />}
+        </div>
+      </div>
+      {/* Bottom banner */}
+      <div className="bg-twitch-purple flex items-center justify-between px-4 py-1.5">
+        <div className="flex items-center gap-2">
+          <svg viewBox="0 0 40 40" className="w-5 h-5 text-primary-foreground" fill="currentColor">
+            <path d="M5.7 0L1.4 10.985V34.314h9.7v5.686h5.7L22.6 34.314h7.1l9.7-10.985V0H5.7zM8.6 2.857h27.4v17.143l-5.7 5.714h-8.6l-5.7 5.714v-5.714H8.6V2.857zM17.2 8.57h2.9v8.572h-2.9V8.57zm8.6 0h2.9v8.572h-2.9V8.57z" />
+          </svg>
+          <span className="text-primary-foreground text-xs font-semibold">Join the Twitch community!</span>
+          <span className="text-primary-foreground/80 text-xs">Discover the best live streams anywhere.</span>
+        </div>
+        <button className="bg-foreground text-background px-3 py-0.5 rounded text-xs font-semibold">Sign Up</button>
       </div>
     </div>
   );
 };
-
-const FlowHeader = ({ onBack, title }: { onBack: () => void; title: string }) => (
-  <div className="bg-background border-b border-border px-4 py-2 flex items-center gap-3">
-    <button onClick={onBack} className="text-muted-foreground hover:text-foreground text-sm">← Home</button>
-    <span className="text-foreground font-semibold text-sm">{title}</span>
-  </div>
-);
 
 export default Index;
