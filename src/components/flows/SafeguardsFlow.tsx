@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { ArrowRight, ShoppingCart, X, Star } from "lucide-react";
-import TwitchNav from "../TwitchNav";
+
 import StreamVideo from "../StreamVideo";
 
 type SafeguardStep = "creator-optin" | "viewer-prefs" | "comparison" | "scale";
@@ -45,7 +45,7 @@ const SafeguardsFlow = () => {
           )}
         </div>
       </div>
-      <TwitchNav />
+      
 
       <div className="flex-1 overflow-y-auto">
         {step === "creator-optin" && (
