@@ -1,54 +1,102 @@
-import { Search, Bell, MessageSquare, Crown } from "lucide-react";
+import { Search, Bell, MessageSquare, Crown, LayoutDashboard, Settings, ChevronDown } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
 
 interface TwitchTopNavProps {
   onNavigate?: (page: string) => void;
   currentPage?: string;
 }
 
-const TwitchTopNav = ({ onNavigate, currentPage }: TwitchTopNavProps) => (
-  <div className="flex items-center justify-between px-2 py-1.5 bg-twitch-panel border-b border-border h-[50px]">
-    <div className="flex items-center gap-3">
-      <button onClick={() => onNavigate?.("home")} className="flex items-center">
-        <svg viewBox="0 0 40 40" className="w-8 h-8 text-twitch-purple" fill="currentColor">
-          <path d="M5.7 0L1.4 10.985V34.314h9.7v5.686h5.7L22.6 34.314h7.1l9.7-10.985V0H5.7zM8.6 2.857h27.4v17.143l-5.7 5.714h-8.6l-5.7 5.714v-5.714H8.6V2.857zM17.2 8.57h2.9v8.572h-2.9V8.57zm8.6 0h2.9v8.572h-2.9V8.57z" />
-        </svg>
-      </button>
-      <button
-        onClick={() => onNavigate?.("browse")}
-        className={`text-foreground font-bold text-sm hover:text-twitch-purple transition-colors ${currentPage === "browse" ? "text-twitch-purple" : ""}`}
-      >
-        Browse
-      </button>
-      <span className="text-muted-foreground text-sm">|</span>
-      <button
-        onClick={() => onNavigate?.("viewer")}
-        className={`text-sm font-semibold hover:text-twitch-purple transition-colors flex items-center gap-1 ${currentPage === "viewer" ? "text-twitch-purple" : "text-muted-foreground"}`}
-      >
-        <Crown className="w-3.5 h-3.5" /> Live Demo
-      </button>
-    </div>
-    <div className="flex items-center bg-secondary rounded px-3 py-1.5 w-[380px]">
-      <input className="bg-transparent text-foreground text-sm flex-1 outline-none placeholder:text-muted-foreground" placeholder="Search" />
-      <div className="border-l border-border pl-2 ml-2">
-        <Search className="w-4 h-4 text-muted-foreground" />
+const TwitchTopNav = ({ onNavigate, currentPage }: TwitchTopNavProps) => {
+  const [showDropdown, setShowDropdown] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setShowDropdown(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  return (
+    <div className="flex items-center justify-between px-2 py-1.5 bg-twitch-panel border-b border-border h-[50px]">
+      <div className="flex items-center gap-3">
+        <button onClick={() => onNavigate?.("home")} className="flex items-center">
+          <svg viewBox="0 0 40 40" className="w-8 h-8 text-twitch-purple" fill="currentColor">
+            <path d="M5.7 0L1.4 10.985V34.314h9.7v5.686h5.7L22.6 34.314h7.1l9.7-10.985V0H5.7zM8.6 2.857h27.4v17.143l-5.7 5.714h-8.6l-5.7 5.714v-5.714H8.6V2.857zM17.2 8.57h2.9v8.572h-2.9V8.57zm8.6 0h2.9v8.572h-2.9V8.57z" />
+          </svg>
+        </button>
+        <button
+          onClick={() => onNavigate?.("browse")}
+          className={`text-foreground font-bold text-sm hover:text-twitch-purple transition-colors ${currentPage === "browse" ? "text-twitch-purple" : ""}`}
+        >
+          Browse
+        </button>
+        <span className="text-muted-foreground text-sm">|</span>
+        <button
+          onClick={() => onNavigate?.("creator")}
+          className={`text-sm font-semibold hover:text-twitch-purple transition-colors flex items-center gap-1 ${currentPage === "creator" ? "text-twitch-purple" : "text-muted-foreground"}`}
+        >
+          <LayoutDashboard className="w-3.5 h-3.5" /> Creator Dashboard
+        </button>
+      </div>
+      <div className="flex items-center bg-secondary rounded px-3 py-1.5 w-[380px]">
+        <input className="bg-transparent text-foreground text-sm flex-1 outline-none placeholder:text-muted-foreground" placeholder="Search" />
+        <div className="border-l border-border pl-2 ml-2">
+          <Search className="w-4 h-4 text-muted-foreground" />
+        </div>
+      </div>
+      <div className="flex items-center gap-3">
+        <button className="relative">
+          <Crown className="w-5 h-5 text-muted-foreground" />
+        </button>
+        <button className="relative">
+          <Bell className="w-5 h-5 text-muted-foreground" />
+          <span className="absolute -top-1 -right-1 w-4 h-4 bg-destructive rounded-full text-[10px] text-primary-foreground flex items-center justify-center font-bold">3</span>
+        </button>
+        <MessageSquare className="w-5 h-5 text-muted-foreground cursor-pointer" />
+        {/* User avatar dropdown */}
+        <div className="relative" ref={dropdownRef}>
+          <button
+            onClick={() => setShowDropdown(!showDropdown)}
+            className="flex items-center gap-1.5 hover:opacity-80 transition-opacity"
+          >
+            <div className="w-8 h-8 rounded-full bg-twitch-purple flex items-center justify-center text-primary-foreground text-xs font-bold">
+              LL
+            </div>
+            <ChevronDown className="w-3 h-3 text-muted-foreground" />
+          </button>
+          {showDropdown && (
+            <div className="absolute right-0 top-full mt-2 w-56 bg-twitch-panel border border-border rounded-lg shadow-xl z-50 py-1">
+              <div className="px-4 py-3 border-b border-border">
+                <p className="text-foreground font-bold text-sm">Lisa Lim</p>
+                <p className="text-muted-foreground text-xs">@lisalim_live</p>
+              </div>
+              <button
+                onClick={() => { onNavigate?.("creator"); setShowDropdown(false); }}
+                className="w-full text-left px-4 py-2 text-sm text-foreground hover:bg-secondary flex items-center gap-2"
+              >
+                <LayoutDashboard className="w-4 h-4" /> Creator Dashboard
+              </button>
+              <button
+                onClick={() => { onNavigate?.("safeguards"); setShowDropdown(false); }}
+                className="w-full text-left px-4 py-2 text-sm text-foreground hover:bg-secondary flex items-center gap-2"
+              >
+                <Settings className="w-4 h-4" /> Settings
+              </button>
+              <div className="border-t border-border mt-1 pt-1">
+                <button className="w-full text-left px-4 py-2 text-sm text-muted-foreground hover:bg-secondary">
+                  Log Out
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
-    <div className="flex items-center gap-3">
-      <button className="relative">
-        <Crown className="w-5 h-5 text-muted-foreground" />
-      </button>
-      <button className="relative">
-        <Bell className="w-5 h-5 text-muted-foreground" />
-        <span className="absolute -top-1 -right-1 w-4 h-4 bg-destructive rounded-full text-[10px] text-primary-foreground flex items-center justify-center font-bold">21</span>
-      </button>
-      <MessageSquare className="w-5 h-5 text-muted-foreground cursor-pointer" />
-      <button className="bg-twitch-purple text-primary-foreground px-3 py-1 rounded text-sm font-semibold">Log In</button>
-      <button className="bg-foreground text-background px-3 py-1 rounded text-sm font-semibold">Sign Up</button>
-      <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center">
-        <svg className="w-5 h-5 text-muted-foreground" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" /></svg>
-      </div>
-    </div>
-  </div>
-);
+  );
+};
 
 export default TwitchTopNav;
