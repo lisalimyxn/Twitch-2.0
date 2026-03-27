@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Search, Star, GripVertical, Trash2, BarChart3, TrendingUp, DollarSign, Eye, ShoppingCart, ArrowRight } from "lucide-react";
-import TwitchNav from "../TwitchNav";
+
 
 type CreatorStep = "dashboard" | "catalog" | "queue" | "live" | "analytics" | "summary";
 
@@ -46,7 +46,7 @@ const CreatorFlow = () => {
           )}
         </div>
       </div>
-      <TwitchNav />
+      
       <div className="flex flex-1 overflow-hidden">
         {/* Sidebar */}
         <div className="w-56 bg-twitch-panel border-r border-border p-4 space-y-1">
