@@ -15,6 +15,14 @@ interface StreamPageProps {
   hasCommerce?: boolean;
 }
 
+// YouTube video IDs for fake "live" streams
+const streamVideos: Record<string, string> = {
+  GamerStreamer_Pro: "jfKfPfyJRdk", // lofi girl (always live)
+  TechReviewer: "dQw4w9WgXcQ",
+  ArtistLive: "5qap5aO4i9A", // lofi chill
+  FashionFwd: "jfKfPfyJRdk",
+};
+
 const StreamPage = ({ channelName, onBack, hasCommerce = true }: StreamPageProps) => {
   const [step, setStep] = useState<ViewerStep>(hasCommerce ? "card" : "stream");
 
@@ -33,6 +41,7 @@ const StreamPage = ({ channelName, onBack, hasCommerce = true }: StreamPageProps
 
   const streamTitle = titles[channelName] || "🔴 LIVE — Chill stream";
   const game = games[channelName] || "Just Chatting";
+  const videoId = streamVideos[channelName] || "jfKfPfyJRdk";
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
@@ -41,17 +50,17 @@ const StreamPage = ({ channelName, onBack, hasCommerce = true }: StreamPageProps
         <div className="flex-1 flex flex-col">
           {/* Video */}
           <div className="flex-1 bg-black relative">
-            <div className="absolute inset-0 bg-gradient-to-br from-twitch-dark via-[#1a0a2e] to-twitch-dark flex items-center justify-center">
-              <div className="text-center space-y-3">
-                <div className="w-28 h-28 mx-auto rounded-full twitch-gradient flex items-center justify-center">
-                  <span className="text-3xl font-bold text-primary-foreground">{channelName.slice(0, 2).toUpperCase()}</span>
-                </div>
-                <h2 className="text-foreground text-lg font-bold">{channelName}</h2>
-                <p className="text-muted-foreground text-sm">Playing: {game}</p>
-              </div>
-            </div>
+            {/* YouTube embed as fake stream */}
+            <iframe
+              className="absolute inset-0 w-full h-full"
+              src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&controls=0&showinfo=0&rel=0&modestbranding=1&loop=1&playlist=${videoId}`}
+              allow="autoplay; encrypted-media"
+              allowFullScreen
+              style={{ border: 0 }}
+            />
+
             {/* Stream bottom bar */}
-            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
+            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4 z-10 pointer-events-none">
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="text-foreground font-bold text-sm">{streamTitle}</h3>
@@ -105,24 +114,18 @@ const StreamPage = ({ channelName, onBack, hasCommerce = true }: StreamPageProps
                 <button className="text-muted-foreground hover:text-foreground"><Users className="w-4 h-4" /></button>
                 <button className="text-muted-foreground hover:text-foreground"><Settings className="w-4 h-4" /></button>
                 <button className="text-muted-foreground hover:text-foreground"><Share2 className="w-4 h-4" /></button>
-                {/* Demo controls */}
                 {hasCommerce && step === "dismissed" && (
                   <button onClick={() => setStep("card")} className="bg-twitch-purple/20 text-twitch-purple px-3 py-1 rounded text-xs font-semibold">
                     ↻ Replay Commerce Flow
                   </button>
                 )}
-                {hasCommerce && step === "stream" && (
-                  <button onClick={() => setStep("card")} className="bg-twitch-purple text-primary-foreground px-3 py-1 rounded text-xs font-semibold">
-                    Show Product Card →
-                  </button>
-                )}
               </div>
             </div>
-            {/* Step indicator for demo */}
+            {/* Step indicator */}
             {hasCommerce && (
               <div className="mt-2 flex items-center gap-2">
-                {["stream", "card", "detail", "confirm", "success", "dismissed"].map((s) => (
-                  <div key={s} className={`h-1 flex-1 rounded-full transition-colors ${step === s ? "bg-twitch-purple" : s === "dismissed" && step !== "stream" ? "bg-secondary" : "bg-secondary"}`}>
+                {(["stream", "card", "detail", "confirm", "success", "dismissed"] as ViewerStep[]).map((s) => (
+                  <div key={s} className={`h-1 flex-1 rounded-full overflow-hidden bg-secondary`}>
                     {(["stream", "card", "detail", "confirm", "success", "dismissed"].indexOf(s) <= ["stream", "card", "detail", "confirm", "success", "dismissed"].indexOf(step)) && (
                       <div className="h-full bg-twitch-purple rounded-full" />
                     )}
