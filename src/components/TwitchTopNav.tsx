@@ -1,5 +1,6 @@
-import { Search, Bell, MessageSquare, Crown, LayoutDashboard, Settings, ChevronDown } from "lucide-react";
+import { Search, Bell, MessageSquare, Crown, LayoutDashboard, Settings, ChevronDown, ShoppingCart, X, Trash2 } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
+import { useCart } from "@/contexts/CartContext";
 
 interface TwitchTopNavProps {
   onNavigate?: (page: string) => void;
@@ -9,16 +10,17 @@ interface TwitchTopNavProps {
 const TwitchTopNav = ({ onNavigate, currentPage }: TwitchTopNavProps) => {
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const { items, removeItem, isOpen, setIsOpen } = useCart();
+  const cartRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
-        setShowDropdown(false);
-      }
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) setShowDropdown(false);
+      if (cartRef.current && !cartRef.current.contains(e.target as Node)) setIsOpen(false);
     };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
-  }, []);
+  }, [setIsOpen]);
 
   return (
     <div className="flex items-center justify-between px-2 py-1.5 bg-twitch-panel border-b border-border h-[50px]">
@@ -57,6 +59,70 @@ const TwitchTopNav = ({ onNavigate, currentPage }: TwitchTopNavProps) => {
           <span className="absolute -top-1 -right-1 w-4 h-4 bg-destructive rounded-full text-[10px] text-primary-foreground flex items-center justify-center font-bold">3</span>
         </button>
         <MessageSquare className="w-5 h-5 text-muted-foreground cursor-pointer" />
+
+        {/* Shopping Cart */}
+        <div className="relative" ref={cartRef}>
+          <button onClick={() => setIsOpen(!isOpen)} className="relative hover:opacity-80 transition-opacity">
+            <ShoppingCart className="w-5 h-5 text-muted-foreground" />
+            {items.length > 0 && (
+              <span className="absolute -top-1 -right-1 w-4 h-4 bg-amazon-orange rounded-full text-[10px] text-black flex items-center justify-center font-bold">
+                {items.length}
+              </span>
+            )}
+          </button>
+          {isOpen && (
+            <div className="absolute right-0 top-full mt-2 w-80 bg-twitch-panel border border-border rounded-lg shadow-xl z-50">
+              <div className="flex items-center justify-between p-3 border-b border-border">
+                <span className="text-foreground font-semibold text-sm">Shopping Cart ({items.length})</span>
+                <button onClick={() => setIsOpen(false)} className="text-muted-foreground hover:text-foreground">
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+              {items.length === 0 ? (
+                <div className="p-6 text-center">
+                  <ShoppingCart className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
+                  <p className="text-muted-foreground text-sm">Your cart is empty</p>
+                </div>
+              ) : (
+                <div className="max-h-80 overflow-y-auto">
+                  {items.map((item, i) => (
+                    <div key={i} className="flex items-center gap-3 p-3 border-b border-border last:border-0 hover:bg-secondary/50 transition-colors">
+                      <div className="w-10 h-10 bg-secondary rounded flex items-center justify-center text-lg flex-shrink-0">
+                        {item.emoji || "📦"}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-foreground text-xs font-semibold truncate">{item.name}</p>
+                        <p className="text-foreground text-sm font-bold">{item.price}</p>
+                        {item.fromChannel && (
+                          <p className="text-muted-foreground text-[10px]">
+                            From <span className="text-twitch-purple">{item.fromChannel}</span>'s stream
+                          </p>
+                        )}
+                      </div>
+                      <button onClick={() => removeItem(i)} className="text-muted-foreground hover:text-destructive transition-colors flex-shrink-0">
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+              {items.length > 0 && (
+                <div className="p-3 border-t border-border space-y-2">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground">Total</span>
+                    <span className="text-foreground font-bold">
+                      ${items.reduce((sum, item) => sum + parseFloat(item.price.replace("$", "")), 0).toFixed(2)}
+                    </span>
+                  </div>
+                  <button className="w-full amazon-btn text-black py-2 rounded-lg font-bold text-sm">
+                    Checkout with amazon pay
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
         {/* User avatar dropdown */}
         <div className="relative" ref={dropdownRef}>
           <button

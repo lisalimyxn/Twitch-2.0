@@ -1,3 +1,8 @@
+import streamIShowSpeed from "@/assets/stream-ishowspeed.jpg";
+import streamGamer from "@/assets/stream-gamer.jpg";
+import streamTech from "@/assets/stream-tech.jpg";
+import streamArtist from "@/assets/stream-artist.jpg";
+import streamFashion from "@/assets/stream-fashion.jpg";
 import { X } from "lucide-react";
 
 const categories = [
@@ -10,14 +15,14 @@ const categories = [
 ];
 
 const liveChannels = [
-  { name: "GamerStreamer_Pro", title: "🔴 Elden Ring Boss Rush — No Death Run!", game: "Elden Ring", viewers: "14.2K", tags: ["English", "Gaming"], hasCommerce: true },
-  { name: "TechReviewer", title: "Unboxing NEW SteelSeries Headset + Giveaway!", game: "Just Chatting", viewers: "8.4K", tags: ["Shopping", "Tech"], hasCommerce: true },
-  { name: "CasualChatting", title: "Chill vibes & Q&A — Come hang out!", game: "Just Chatting", viewers: "3.1K", tags: ["English", "Chill"], hasCommerce: false },
-  { name: "ProLeague_CS2", title: "BLAST Premier Finals — Semi-Final Match", game: "Counter-Strike", viewers: "42.5K", tags: ["Esports", "English"], hasCommerce: false },
-  { name: "ArtistLive", title: "Drawing YOUR characters LIVE! Drop refs in chat", game: "Art", viewers: "1.8K", tags: ["Creative", "Art"], hasCommerce: true },
-  { name: "SpeedRunner_X", title: "WR Attempts — Hollow Knight Any% 🏃", game: "Hollow Knight", viewers: "5.6K", tags: ["Speedrun", "Gaming"], hasCommerce: false },
-  { name: "MusicMaestro", title: "Lo-fi beats to stream to 🎵 Taking requests!", game: "Music", viewers: "2.9K", tags: ["Music", "Chill"], hasCommerce: false },
-  { name: "FashionFwd", title: "Spring Haul Try-On — Shopping Stream!", game: "Just Chatting", viewers: "6.2K", tags: ["Shopping", "Fashion"], hasCommerce: true },
+  { name: "iShowSpeed", title: "🔴 WEARING THE NEW STEELSERIES — BEST HEADPHONES EVER?!", game: "Just Chatting", viewers: "142K", tags: ["English", "Shopping", "Entertainment"], hasCommerce: true, thumbnail: streamIShowSpeed },
+  { name: "GamerGirl_Pro", title: "Ranked Grind — Road to Radiant! 🔥", game: "Valorant", viewers: "8.4K", tags: ["Gaming", "Competitive"], hasCommerce: true, thumbnail: streamGamer },
+  { name: "TechReviewer", title: "Unboxing NEW SteelSeries Headset + Giveaway!", game: "Just Chatting", viewers: "12.1K", tags: ["Shopping", "Tech"], hasCommerce: true, thumbnail: streamTech },
+  { name: "CasualChatting", title: "Chill vibes & Q&A — Come hang out!", game: "Just Chatting", viewers: "3.1K", tags: ["English", "Chill"], hasCommerce: false, thumbnail: null },
+  { name: "ProLeague_CS2", title: "BLAST Premier Finals — Semi-Final Match", game: "Counter-Strike", viewers: "42.5K", tags: ["Esports", "English"], hasCommerce: false, thumbnail: null },
+  { name: "ArtistLive", title: "Drawing YOUR characters LIVE! Drop refs in chat", game: "Art", viewers: "1.8K", tags: ["Creative", "Art"], hasCommerce: true, thumbnail: streamArtist },
+  { name: "SpeedRunner_X", title: "WR Attempts — Hollow Knight Any% 🏃", game: "Hollow Knight", viewers: "5.6K", tags: ["Speedrun", "Gaming"], hasCommerce: false, thumbnail: null },
+  { name: "FashionFwd", title: "Spring Haul Try-On — Shopping Stream!", game: "Just Chatting", viewers: "6.2K", tags: ["Shopping", "Fashion"], hasCommerce: true, thumbnail: streamFashion },
 ];
 
 interface BrowsePageProps {
@@ -68,11 +73,20 @@ const BrowsePage = ({ onWatchStream }: BrowsePageProps) => {
         {liveChannels.map((ch) => (
           <div key={ch.name} className="cursor-pointer group" onClick={() => onWatchStream(ch.name)}>
             <div className="relative aspect-video bg-gradient-to-br from-twitch-dark via-[#1a0a2e] to-twitch-dark rounded-lg overflow-hidden mb-2">
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="w-16 h-16 rounded-full twitch-gradient flex items-center justify-center">
-                  <span className="text-primary-foreground font-bold text-sm">{ch.name.slice(0, 2).toUpperCase()}</span>
+              {ch.thumbnail ? (
+                <img
+                  src={ch.thumbnail}
+                  alt={ch.title}
+                  className="absolute inset-0 w-full h-full object-cover"
+                  loading="lazy"
+                />
+              ) : (
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="w-16 h-16 rounded-full twitch-gradient flex items-center justify-center">
+                    <span className="text-primary-foreground font-bold text-sm">{ch.name.slice(0, 2).toUpperCase()}</span>
+                  </div>
                 </div>
-              </div>
+              )}
               <div className="absolute top-2 left-2 bg-destructive px-1.5 py-0.5 rounded text-[10px] font-bold text-primary-foreground">LIVE</div>
               <div className="absolute bottom-2 left-2 bg-black/70 px-1.5 py-0.5 rounded text-[10px] text-foreground">{ch.viewers} viewers</div>
               {ch.hasCommerce && (
