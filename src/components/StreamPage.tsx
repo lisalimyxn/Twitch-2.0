@@ -15,11 +15,11 @@ interface StreamPageProps {
   hasCommerce?: boolean;
 }
 
-// YouTube video IDs for fake "live" streams
 const streamVideos: Record<string, string> = {
-  GamerStreamer_Pro: "jfKfPfyJRdk", // lofi girl (always live)
-  TechReviewer: "dQw4w9WgXcQ",
-  ArtistLive: "5qap5aO4i9A", // lofi chill
+  iShowSpeed: "jfKfPfyJRdk",
+  GamerGirl_Pro: "dQw4w9WgXcQ",
+  TechReviewer: "5qap5aO4i9A",
+  ArtistLive: "5qap5aO4i9A",
   FashionFwd: "jfKfPfyJRdk",
 };
 
@@ -27,13 +27,15 @@ const StreamPage = ({ channelName, onBack, hasCommerce = true }: StreamPageProps
   const [step, setStep] = useState<ViewerStep>(hasCommerce ? "card" : "stream");
 
   const titles: Record<string, string> = {
-    GamerStreamer_Pro: "🔴 Elden Ring Boss Rush — No Death Run!",
+    iShowSpeed: "🔴 WEARING THE NEW STEELSERIES — BEST HEADPHONES EVER?!",
+    GamerGirl_Pro: "Ranked Grind — Road to Radiant! 🔥",
     TechReviewer: "Unboxing NEW SteelSeries Headset + Giveaway!",
     ArtistLive: "Drawing YOUR characters LIVE! Drop refs in chat",
     FashionFwd: "Spring Haul Try-On — Shopping Stream!",
   };
   const games: Record<string, string> = {
-    GamerStreamer_Pro: "Elden Ring",
+    iShowSpeed: "Just Chatting",
+    GamerGirl_Pro: "Valorant",
     TechReviewer: "Just Chatting",
     ArtistLive: "Art",
     FashionFwd: "Just Chatting",
@@ -46,11 +48,8 @@ const StreamPage = ({ channelName, onBack, hasCommerce = true }: StreamPageProps
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
       <div className="flex flex-1 overflow-hidden">
-        {/* Video + overlay area */}
         <div className="flex-1 flex flex-col">
-          {/* Video */}
           <div className="flex-1 bg-black relative">
-            {/* YouTube embed as fake stream */}
             <iframe
               className="absolute inset-0 w-full h-full"
               src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&controls=0&showinfo=0&rel=0&modestbranding=1&loop=1&playlist=${videoId}`}
@@ -58,8 +57,6 @@ const StreamPage = ({ channelName, onBack, hasCommerce = true }: StreamPageProps
               allowFullScreen
               style={{ border: 0 }}
             />
-
-            {/* Stream bottom bar */}
             <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4 z-10 pointer-events-none">
               <div className="flex items-center justify-between">
                 <div>
@@ -73,7 +70,6 @@ const StreamPage = ({ channelName, onBack, hasCommerce = true }: StreamPageProps
               </div>
             </div>
 
-            {/* Commerce overlays */}
             <AnimatePresence>
               {step === "card" && (
                 <ProductCard onDismiss={() => setStep("dismissed")} onTap={() => setStep("detail")} />
@@ -94,7 +90,6 @@ const StreamPage = ({ channelName, onBack, hasCommerce = true }: StreamPageProps
             </AnimatePresence>
           </div>
 
-          {/* Below video info */}
           <div className="bg-twitch-panel border-t border-border px-4 py-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -123,8 +118,6 @@ const StreamPage = ({ channelName, onBack, hasCommerce = true }: StreamPageProps
             </div>
           </div>
         </div>
-
-        {/* Chat */}
         <TwitchChat />
       </div>
     </div>
