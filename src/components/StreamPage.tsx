@@ -121,18 +121,6 @@ const StreamPage = ({ channelName, onBack, hasCommerce = true }: StreamPageProps
                 )}
               </div>
             </div>
-            {/* Step indicator */}
-            {hasCommerce && (
-              <div className="mt-2 flex items-center gap-2">
-                {(["stream", "card", "detail", "confirm", "success", "dismissed"] as ViewerStep[]).map((s) => (
-                  <div key={s} className={`h-1 flex-1 rounded-full overflow-hidden bg-secondary`}>
-                    {(["stream", "card", "detail", "confirm", "success", "dismissed"].indexOf(s) <= ["stream", "card", "detail", "confirm", "success", "dismissed"].indexOf(step)) && (
-                      <div className="h-full bg-twitch-purple rounded-full" />
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
           </div>
         </div>
 
