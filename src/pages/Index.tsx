@@ -16,10 +16,6 @@ const Index = () => {
     if (target === "home" || target === "browse") setPage("browse");
     else if (target === "creator") setPage("creator");
     else if (target === "safeguards") setPage("safeguards");
-    else if (target === "viewer") {
-      setActiveChannel("GamerStreamer_Pro");
-      setPage("stream");
-    }
   };
 
   const handleWatchStream = (channelName: string) => {
@@ -31,7 +27,7 @@ const Index = () => {
     <div className="h-screen flex flex-col bg-background">
       <TwitchTopNav onNavigate={handleNavigate} currentPage={page} />
       <div className="flex flex-1 overflow-hidden">
-        <TwitchSidebar />
+        {(page === "browse" || page === "stream") && <TwitchSidebar />}
         <div className="flex-1 flex flex-col overflow-hidden">
           {page === "browse" && <BrowsePage onWatchStream={handleWatchStream} />}
           {page === "stream" && (
@@ -41,8 +37,8 @@ const Index = () => {
               hasCommerce={["GamerStreamer_Pro", "TechReviewer", "ArtistLive", "FashionFwd"].includes(activeChannel)}
             />
           )}
-          {page === "creator" && <CreatorFlow />}
-          {page === "safeguards" && <SafeguardsFlow />}
+          {page === "creator" && <CreatorFlow onBack={() => setPage("browse")} />}
+          {page === "safeguards" && <SafeguardsFlow onBack={() => setPage("browse")} />}
         </div>
       </div>
     </div>

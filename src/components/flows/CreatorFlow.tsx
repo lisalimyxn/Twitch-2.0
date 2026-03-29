@@ -1,6 +1,5 @@
 import { useState } from "react";
-import { Search, Star, GripVertical, Trash2, BarChart3, TrendingUp, DollarSign, Eye, ShoppingCart, ArrowRight } from "lucide-react";
-
+import { Search, Star, GripVertical, Trash2, BarChart3, TrendingUp, DollarSign, Eye, ShoppingCart, ArrowLeft } from "lucide-react";
 
 type CreatorStep = "dashboard" | "catalog" | "queue" | "live" | "analytics" | "summary";
 
@@ -15,41 +14,39 @@ const products = [
   { name: "Corsair K70 RGB Pro", price: "$139.99", rating: 4.2, reviews: 1982, commission: "13%" },
 ];
 
-const CreatorFlow = () => {
+interface CreatorFlowProps {
+  onBack?: () => void;
+}
+
+const CreatorFlow = ({ onBack }: CreatorFlowProps) => {
   const [step, setStep] = useState<CreatorStep>("dashboard");
   const [queued, setQueued] = useState([products[0], products[2], products[4]]);
+  const [commerceEnabled, setCommerceEnabled] = useState(true);
 
-  const stepLabels: Record<CreatorStep, string> = {
-    dashboard: "Screen 1: Creator Dashboard — Commerce Tab",
-    catalog: "Screen 2: Browse Amazon Catalog (Twitch-native UI)",
-    queue: "Screen 3: Product Queue for today's stream",
-    live: "Screen 4: Live stream — Creator's control view",
-    analytics: "Screen 5: Real-time analytics during stream",
-    summary: "Screen 6: Post-stream Commerce Summary",
+  const goBack = () => {
+    const backMap: Record<CreatorStep, CreatorStep | "exit"> = {
+      dashboard: "exit",
+      catalog: "dashboard",
+      queue: "dashboard",
+      live: "queue",
+      analytics: "live",
+      summary: "dashboard",
+    };
+    const target = backMap[step];
+    if (target === "exit") onBack?.();
+    else setStep(target);
   };
-
-  const steps: CreatorStep[] = ["dashboard", "catalog", "queue", "live", "analytics", "summary"];
-  const currentIdx = steps.indexOf(step);
 
   return (
     <div className="h-full flex flex-col">
-      <div className="bg-twitch-panel/80 border-b border-border px-4 py-2 flex items-center justify-between">
-        <span className="text-sm text-twitch-purple font-semibold">{stepLabels[step]}</span>
-        <div className="flex gap-2">
-          {currentIdx > 0 && (
-            <button onClick={() => setStep(steps[currentIdx - 1])} className="bg-secondary text-foreground px-3 py-1 rounded text-xs">← Back</button>
-          )}
-          {currentIdx < steps.length - 1 && (
-            <button onClick={() => setStep(steps[currentIdx + 1])} className="bg-twitch-purple text-primary-foreground px-3 py-1 rounded text-xs font-semibold flex items-center gap-1">
-              Next <ArrowRight className="w-3 h-3" />
-            </button>
-          )}
-        </div>
-      </div>
-      
       <div className="flex flex-1 overflow-hidden">
         {/* Sidebar */}
         <div className="w-56 bg-twitch-panel border-r border-border p-4 space-y-1">
+          {onBack && (
+            <button onClick={onBack} className="w-full text-left px-3 py-2 rounded text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-twitch-hover flex items-center gap-2 mb-2">
+              <ArrowLeft className="w-4 h-4" /> Back to Twitch
+            </button>
+          )}
           {sidebarItems.map((item) => (
             <button
               key={item}
@@ -73,38 +70,46 @@ const CreatorFlow = () => {
                   <h3 className="text-foreground font-semibold">Enable Commerce for Next Stream</h3>
                   <p className="text-muted-foreground text-sm">Allow product cards during your stream</p>
                 </div>
-                <div className="w-12 h-6 bg-twitch-purple rounded-full relative cursor-pointer">
-                  <div className="absolute right-0.5 top-0.5 w-5 h-5 bg-primary-foreground rounded-full" />
-                </div>
+                <button
+                  onClick={() => setCommerceEnabled(!commerceEnabled)}
+                  className={`w-12 h-6 rounded-full relative cursor-pointer transition-colors ${commerceEnabled ? "bg-twitch-purple" : "bg-secondary"}`}
+                >
+                  <div className={`absolute top-0.5 w-5 h-5 bg-primary-foreground rounded-full transition-all ${commerceEnabled ? "right-0.5" : "left-0.5"}`} />
+                </button>
               </div>
-              <div className="grid grid-cols-2 gap-4">
-                <button onClick={() => setStep("queue")} className="bg-twitch-panel border border-border rounded-lg p-4 text-left hover:border-twitch-purple transition-colors">
-                  <ShoppingCart className="w-6 h-6 text-twitch-purple mb-2" />
-                  <h3 className="text-foreground font-semibold">Your Product Queue</h3>
-                  <p className="text-muted-foreground text-sm">{queued.length} products queued</p>
-                </button>
-                <button onClick={() => setStep("catalog")} className="bg-twitch-panel border border-border rounded-lg p-4 text-left hover:border-twitch-purple transition-colors">
-                  <Search className="w-6 h-6 text-twitch-purple mb-2" />
-                  <h3 className="text-foreground font-semibold">Browse Catalog</h3>
-                  <p className="text-muted-foreground text-sm">Search Amazon products</p>
-                </button>
-                <button onClick={() => setStep("summary")} className="bg-twitch-panel border border-border rounded-lg p-4 text-left hover:border-twitch-purple transition-colors">
-                  <BarChart3 className="w-6 h-6 text-twitch-purple mb-2" />
-                  <h3 className="text-foreground font-semibold">Commerce Analytics</h3>
-                  <p className="text-muted-foreground text-sm">View performance data</p>
-                </button>
-                <div className="bg-twitch-panel border border-border rounded-lg p-4">
-                  <TrendingUp className="w-6 h-6 text-success mb-2" />
-                  <h3 className="text-foreground font-semibold">Last Stream Revenue</h3>
-                  <p className="text-foreground text-xl font-bold">$127.50</p>
+              {commerceEnabled && (
+                <div className="grid grid-cols-2 gap-4">
+                  <button onClick={() => setStep("queue")} className="bg-twitch-panel border border-border rounded-lg p-4 text-left hover:border-twitch-purple transition-colors">
+                    <ShoppingCart className="w-6 h-6 text-twitch-purple mb-2" />
+                    <h3 className="text-foreground font-semibold">Your Product Queue</h3>
+                    <p className="text-muted-foreground text-sm">{queued.length} products queued</p>
+                  </button>
+                  <button onClick={() => setStep("catalog")} className="bg-twitch-panel border border-border rounded-lg p-4 text-left hover:border-twitch-purple transition-colors">
+                    <Search className="w-6 h-6 text-twitch-purple mb-2" />
+                    <h3 className="text-foreground font-semibold">Browse Catalog</h3>
+                    <p className="text-muted-foreground text-sm">Search Amazon products</p>
+                  </button>
+                  <button onClick={() => setStep("summary")} className="bg-twitch-panel border border-border rounded-lg p-4 text-left hover:border-twitch-purple transition-colors">
+                    <BarChart3 className="w-6 h-6 text-twitch-purple mb-2" />
+                    <h3 className="text-foreground font-semibold">Commerce Analytics</h3>
+                    <p className="text-muted-foreground text-sm">View performance data</p>
+                  </button>
+                  <div className="bg-twitch-panel border border-border rounded-lg p-4">
+                    <TrendingUp className="w-6 h-6 text-success mb-2" />
+                    <h3 className="text-foreground font-semibold">Last Stream Revenue</h3>
+                    <p className="text-foreground text-xl font-bold">$127.50</p>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           )}
 
           {step === "catalog" && (
             <div className="space-y-4 max-w-4xl">
-              <h2 className="text-foreground text-2xl font-bold">Browse Catalog</h2>
+              <div className="flex items-center gap-3">
+                <button onClick={goBack} className="text-muted-foreground hover:text-foreground"><ArrowLeft className="w-5 h-5" /></button>
+                <h2 className="text-foreground text-2xl font-bold">Browse Catalog</h2>
+              </div>
               <div className="flex gap-3">
                 <div className="flex-1 flex items-center bg-secondary rounded-lg px-4 py-2">
                   <Search className="w-4 h-4 text-muted-foreground mr-2" />
@@ -154,7 +159,10 @@ const CreatorFlow = () => {
 
           {step === "queue" && (
             <div className="space-y-4 max-w-2xl">
-              <h2 className="text-foreground text-2xl font-bold">Product Queue</h2>
+              <div className="flex items-center gap-3">
+                <button onClick={goBack} className="text-muted-foreground hover:text-foreground"><ArrowLeft className="w-5 h-5" /></button>
+                <h2 className="text-foreground text-2xl font-bold">Product Queue</h2>
+              </div>
               <p className="text-muted-foreground text-sm">Products queued for your next stream. Drag to reorder.</p>
               <div className="space-y-2">
                 {queued.map((p, i) => (
@@ -181,16 +189,20 @@ const CreatorFlow = () => {
 
           {step === "live" && (
             <div className="space-y-4 max-w-4xl">
-              <h2 className="text-foreground text-2xl font-bold">Stream Manager</h2>
+              <div className="flex items-center gap-3">
+                <button onClick={goBack} className="text-muted-foreground hover:text-foreground"><ArrowLeft className="w-5 h-5" /></button>
+                <h2 className="text-foreground text-2xl font-bold">Stream Manager</h2>
+              </div>
               <div className="grid grid-cols-3 gap-4">
                 <div className="col-span-2 bg-black rounded-lg aspect-video flex items-center justify-center relative">
-                  <div className="text-center">
-                    <div className="w-16 h-16 mx-auto rounded-full twitch-gradient flex items-center justify-center">
-                      <span className="text-xl font-bold text-primary-foreground">GS</span>
-                    </div>
-                    <p className="text-muted-foreground text-sm mt-2">Stream Preview</p>
-                  </div>
-                  <div className="absolute top-2 left-2 bg-destructive px-2 py-0.5 rounded text-xs font-bold text-primary-foreground">🔴 LIVE</div>
+                  <iframe
+                    className="absolute inset-0 w-full h-full rounded-lg"
+                    src="https://www.youtube.com/embed/jfKfPfyJRdk?autoplay=0&mute=1&controls=0&showinfo=0&rel=0&modestbranding=1"
+                    allow="encrypted-media"
+                    allowFullScreen
+                    style={{ border: 0 }}
+                  />
+                  <div className="absolute top-2 left-2 bg-destructive px-2 py-0.5 rounded text-xs font-bold text-primary-foreground z-10">🔴 LIVE</div>
                 </div>
                 <div className="bg-twitch-panel border border-border rounded-lg p-4 space-y-3">
                   <h3 className="text-foreground font-semibold text-sm">Commerce Panel</h3>
@@ -216,7 +228,10 @@ const CreatorFlow = () => {
 
           {step === "analytics" && (
             <div className="space-y-4 max-w-3xl">
-              <h2 className="text-foreground text-2xl font-bold">Live Analytics</h2>
+              <div className="flex items-center gap-3">
+                <button onClick={goBack} className="text-muted-foreground hover:text-foreground"><ArrowLeft className="w-5 h-5" /></button>
+                <h2 className="text-foreground text-2xl font-bold">Live Analytics</h2>
+              </div>
               <div className="grid grid-cols-2 gap-4">
                 {[
                   { label: "Products Featured", value: "3", icon: ShoppingCart, color: "text-twitch-purple" },
@@ -247,7 +262,10 @@ const CreatorFlow = () => {
 
           {step === "summary" && (
             <div className="space-y-4 max-w-3xl">
-              <h2 className="text-foreground text-2xl font-bold">Post-Stream Commerce Summary</h2>
+              <div className="flex items-center gap-3">
+                <button onClick={goBack} className="text-muted-foreground hover:text-foreground"><ArrowLeft className="w-5 h-5" /></button>
+                <h2 className="text-foreground text-2xl font-bold">Post-Stream Commerce Summary</h2>
+              </div>
               <div className="grid grid-cols-3 gap-4">
                 <div className="bg-twitch-panel border border-border rounded-lg p-4 text-center">
                   <p className="text-muted-foreground text-xs">Total GMV</p>
