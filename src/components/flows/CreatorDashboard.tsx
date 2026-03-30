@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { TrendingUp, DollarSign, ShoppingCart, Users, Brain, Clock, Sparkles, Eye, ChevronDown, ChevronUp } from "lucide-react";
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, AreaChart, Area, LineChart, Line } from "recharts";
+import { TrendingUp, DollarSign, ShoppingCart, Users, Brain, Clock, Sparkles, ChevronDown, ChevronUp } from "lucide-react";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, AreaChart, Area } from "recharts";
 
 /* ── STATIC DATA ── */
 const monthlyData = [
@@ -18,29 +18,26 @@ const monthlyData = [
   { month: "Mar", revenue: 567, sales: 220 },
 ];
 
-const audienceSegments = [
-  { name: "Core Gamers", value: 35.8, avg: "$110", color: "hsl(264, 100%, 64%)" },
-  { name: "Casual Viewers", value: 25.2, avg: "$99", color: "hsl(200, 100%, 68%)" },
-  { name: "Tech Enthusiasts", value: 24.0, avg: "$119", color: "hsl(145, 63%, 52%)" },
-  { name: "High-Value Buyers", value: 15.0, avg: "$108", color: "hsl(36, 100%, 50%)" },
+const ageData = [
+  { group: "13–17", percent: 8 },
+  { group: "18–24", percent: 42 },
+  { group: "25–34", percent: 31 },
+  { group: "35–44", percent: 13 },
+  { group: "45+", percent: 6 },
 ];
 
-const interestData = [
-  { name: "Tech Gadgets", value: 31.8 },
-  { name: "Gaming Peripherals", value: 26.8 },
-  { name: "Software", value: 13.1 },
-  { name: "Energy Drinks", value: 9.9 },
-  { name: "Furniture", value: 8.5 },
-  { name: "Apparel", value: 6.4 },
-  { name: "Collectibles", value: 3.4 },
+const genderData = [
+  { name: "Male", value: 70.8, color: "hsl(200, 100%, 68%)" },
+  { name: "Female", value: 22.4, color: "hsl(330, 80%, 65%)" },
+  { name: "Other", value: 6.8, color: "hsl(145, 63%, 52%)" },
 ];
 
 const recommendedProducts = [
-  { name: "Logitech G Pro X Superlight 2", price: "$79.99", match: 83, cvr: "8.2%", reason: "Top match for segment" },
-  { name: "Elgato Stream Deck MK.2", price: "$99.99", match: 83, cvr: "5.5%", reason: "Trending in gaming" },
-  { name: "Blue Yeti USB Microphone", price: "$129.99", match: 81, cvr: "4.8%", reason: "Strong price-point fit" },
-  { name: "Razer Kraken V4 Headset", price: "$129.99", match: 79, cvr: "6.8%", reason: "Top seller in segment" },
-  { name: "Razer Chroma Mousepad XL", price: "$49.99", match: 78, cvr: "9.5%", reason: "Highest CVR potential" },
+  { name: "Logitech G Pro X Superlight 2", price: "$79.99", match: 83, reason: "Top match for your audience" },
+  { name: "Elgato Stream Deck MK.2", price: "$99.99", match: 83, reason: "Trending in gaming" },
+  { name: "Blue Yeti USB Microphone", price: "$129.99", match: 81, reason: "Strong price-point fit" },
+  { name: "Razer Kraken V4 Headset", price: "$129.99", match: 79, reason: "Top seller in segment" },
+  { name: "Razer Chroma Mousepad XL", price: "$49.99", match: 78, reason: "Highest conversion potential" },
 ];
 
 const topProducts = [
@@ -51,22 +48,14 @@ const topProducts = [
   { name: "Razer DeathAdder V3 Pro", sales: 134, revenue: "$402", cvr: "3.9%" },
 ];
 
-// Engagement curve (simulated Gaussian peak around minute 55-65)
 const engagementData = Array.from({ length: 24 }, (_, i) => {
   const min = i * 5;
   const peak = 60;
   const engagement = Math.exp(-0.5 * Math.pow((min - peak) / 25, 2)) * 100;
-  return { minute: `${min}m`, engagement: Math.round(engagement), min };
+  return { minute: `${min}m`, engagement: Math.round(engagement) };
 });
 
-// Revenue timeline (cumulative, from AI output)
-const revenueTimeline = [40, 44, 45, 73, 73, 108, 116, 175, 212, 253, 284, 354, 409, 444, 496, 545, 583, 633, 646, 671, 676, 699, 720, 720, 731, 741, 741, 755, 755, 755].map((v, i) => ({
-  minute: `${(i + 1) * 4}m`,
-  actual: v,
-  smoothed: [40, 41, 42, 52, 58, 73, 86, 113, 142, 176, 208, 252, 299, 342, 388, 435, 480, 526, 562, 594, 619, 643, 666, 682, 697, 710, 719, 730, 738, 743][i],
-}));
-
-const PIE_COLORS = ["hsl(264, 100%, 64%)", "hsl(200, 100%, 68%)", "hsl(145, 63%, 52%)", "hsl(36, 100%, 50%)"];
+const GENDER_COLORS = ["hsl(200, 100%, 68%)", "hsl(330, 80%, 65%)", "hsl(145, 63%, 52%)"];
 
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (!active || !payload?.length) return null;
@@ -75,7 +64,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
       <p className="text-foreground font-semibold">{label}</p>
       {payload.map((p: any, i: number) => (
         <p key={i} className="text-muted-foreground">
-          {p.name}: <span className="text-foreground font-medium">{typeof p.value === "number" && p.name?.includes("evenue") ? `$${p.value}` : p.value}</span>
+          {p.name}: <span className="text-foreground font-medium">{typeof p.value === "number" && p.name?.includes("evenue") ? `$${p.value}` : p.value}{typeof p.value === "number" && p.name !== "Revenue" ? "%" : ""}</span>
         </p>
       ))}
     </div>
@@ -97,10 +86,10 @@ const CreatorDashboard = () => {
       {/* KPI Cards */}
       <div className="grid grid-cols-4 gap-3">
         {[
-          { label: "Revenue (12mo)", value: `$${totalRevenue.toLocaleString()}`, icon: DollarSign, color: "text-success" },
-          { label: "Sales (12mo)", value: totalSales.toLocaleString(), icon: ShoppingCart, color: "text-twitch-purple" },
-          { label: "Avg CVR", value: "4.8%", icon: TrendingUp, color: "text-amazon-orange" },
-          { label: "Unique Buyers", value: "1,247", icon: Users, color: "text-foreground" },
+          { label: "Total Revenue", sub: "Last 12 months", value: `$${totalRevenue.toLocaleString()}`, icon: DollarSign, color: "text-success" },
+          { label: "Total Sales", sub: "Last 12 months", value: totalSales.toLocaleString(), icon: ShoppingCart, color: "text-twitch-purple" },
+          { label: "Conversion Rate", sub: "Viewers → Buyers", value: "4.8%", icon: TrendingUp, color: "text-amazon-orange" },
+          { label: "Unique Buyers", sub: "Distinct customers", value: "1,247", icon: Users, color: "text-foreground" },
         ].map((s, i) => (
           <div key={i} className="bg-twitch-panel border border-border rounded-lg p-3">
             <div className="flex items-center gap-1.5 mb-1">
@@ -108,13 +97,15 @@ const CreatorDashboard = () => {
               <span className="text-muted-foreground text-[10px]">{s.label}</span>
             </div>
             <p className={`text-xl font-bold ${s.color}`}>{s.value}</p>
+            <p className="text-muted-foreground text-[9px] mt-0.5">{s.sub}</p>
           </div>
         ))}
       </div>
 
       {/* Revenue Chart */}
       <div className="bg-twitch-panel border border-border rounded-lg p-4">
-        <h3 className="text-foreground font-semibold text-sm mb-3">Monthly Revenue</h3>
+        <h3 className="text-foreground font-semibold text-sm mb-1">Monthly Revenue</h3>
+        <p className="text-muted-foreground text-[10px] mb-3">Revenue from product sales per month ($)</p>
         <div className="h-44">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={monthlyData}>
@@ -129,18 +120,18 @@ const CreatorDashboard = () => {
 
       {/* Top Products */}
       <div className="bg-twitch-panel border border-border rounded-lg p-4">
-        <h3 className="text-foreground font-semibold text-sm mb-2">Top Products</h3>
+        <h3 className="text-foreground font-semibold text-sm mb-1">Top Selling Products</h3>
+        <p className="text-muted-foreground text-[10px] mb-2">Your best performers by units sold. CVR = % of viewers who bought.</p>
+        <div className="grid grid-cols-[auto_1fr_auto_auto_auto] gap-x-3 gap-y-0 text-[10px] text-muted-foreground font-semibold mb-1 px-1">
+          <span>#</span><span>Product</span><span>Sales</span><span>Revenue</span><span>CVR</span>
+        </div>
         {topProducts.map((p, i) => (
-          <div key={i} className="flex items-center justify-between py-1.5 border-b border-border last:border-0 text-xs">
-            <div className="flex items-center gap-2">
-              <span className="text-muted-foreground font-mono w-4">#{i + 1}</span>
-              <span className="text-foreground text-sm">{p.name}</span>
-            </div>
-            <div className="flex items-center gap-4">
-              <span className="text-muted-foreground">{p.sales} sales</span>
-              <span className="text-foreground font-semibold">{p.revenue}</span>
-              <span className="text-success font-semibold">{p.cvr}</span>
-            </div>
+          <div key={i} className="grid grid-cols-[auto_1fr_auto_auto_auto] gap-x-3 items-center py-1.5 border-b border-border last:border-0 px-1">
+            <span className="text-muted-foreground font-mono text-xs w-4">#{i + 1}</span>
+            <span className="text-foreground text-sm">{p.name}</span>
+            <span className="text-muted-foreground text-xs">{p.sales}</span>
+            <span className="text-foreground text-xs font-semibold">{p.revenue}</span>
+            <span className="text-success text-xs font-semibold">{p.cvr}</span>
           </div>
         ))}
       </div>
@@ -153,75 +144,69 @@ const CreatorDashboard = () => {
           <span className="bg-twitch-purple/20 text-twitch-purple text-[10px] px-2 py-0.5 rounded-full font-medium">Powered by AI</span>
         </div>
 
-        {/* Audience Demographics + Pie */}
+        {/* Demographics: Age + Gender side by side */}
         <div className="grid grid-cols-2 gap-4">
+          {/* Age Distribution */}
           <div className="bg-secondary rounded-lg p-3">
-            <div className="flex items-center gap-2 mb-2">
-              <Users className="w-4 h-4 text-twitch-purple" />
-              <h4 className="text-foreground text-sm font-semibold">Audience Segments</h4>
-            </div>
+            <h4 className="text-foreground text-sm font-semibold mb-1">Viewer Age</h4>
+            <p className="text-muted-foreground text-[10px] mb-2">% of your audience by age group</p>
             <div className="h-36">
               <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={ageData}>
+                  <XAxis dataKey="group" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fontSize: 9, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} tickFormatter={v => `${v}%`} />
+                  <Tooltip formatter={(v: number) => `${v}%`} />
+                  <Bar dataKey="percent" name="Viewers" fill="hsl(264, 100%, 64%)" radius={[3, 3, 0, 0]} opacity={0.8} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
+          {/* Gender Split */}
+          <div className="bg-secondary rounded-lg p-3">
+            <h4 className="text-foreground text-sm font-semibold mb-1">Viewer Gender</h4>
+            <p className="text-muted-foreground text-[10px] mb-2">Gender breakdown of your audience</p>
+            <div className="h-28">
+              <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
-                  <Pie data={audienceSegments} cx="50%" cy="50%" innerRadius={30} outerRadius={55} dataKey="value" paddingAngle={2}>
-                    {audienceSegments.map((_, i) => <Cell key={i} fill={PIE_COLORS[i]} />)}
+                  <Pie data={genderData} cx="50%" cy="50%" innerRadius={25} outerRadius={48} dataKey="value" paddingAngle={3}>
+                    {genderData.map((_, i) => <Cell key={i} fill={GENDER_COLORS[i]} />)}
                   </Pie>
                   <Tooltip formatter={(v: number) => `${v}%`} />
                 </PieChart>
               </ResponsiveContainer>
             </div>
             <div className="space-y-1 mt-1">
-              {audienceSegments.map((s, i) => (
+              {genderData.map((g, i) => (
                 <div key={i} className="flex items-center justify-between text-[11px]">
                   <div className="flex items-center gap-1.5">
-                    <div className="w-2 h-2 rounded-full" style={{ background: PIE_COLORS[i] }} />
-                    <span className="text-foreground">{s.name}</span>
+                    <div className="w-2 h-2 rounded-full" style={{ background: GENDER_COLORS[i] }} />
+                    <span className="text-foreground">{g.name}</span>
                   </div>
-                  <div className="flex gap-3">
-                    <span className="text-muted-foreground">{s.value}%</span>
-                    <span className="text-amazon-orange font-medium">{s.avg}</span>
-                  </div>
+                  <span className="text-muted-foreground">{g.value}%</span>
                 </div>
               ))}
             </div>
-          </div>
-
-          <div className="bg-secondary rounded-lg p-3">
-            <div className="flex items-center gap-2 mb-2">
-              <Eye className="w-4 h-4 text-foreground" />
-              <h4 className="text-foreground text-sm font-semibold">Audience Interests</h4>
-            </div>
-            <div className="h-44">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={interestData} layout="vertical" margin={{ left: 10 }}>
-                  <XAxis type="number" tick={{ fontSize: 9, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} tickFormatter={v => `${v}%`} />
-                  <YAxis dataKey="name" type="category" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} width={95} />
-                  <Bar dataKey="value" fill="hsl(264, 100%, 64%)" radius={[0, 3, 3, 0]} opacity={0.7} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-            <p className="text-muted-foreground text-[10px] mt-1">70.8% male, 18–24 · Sweet spot: $50–$150</p>
           </div>
         </div>
 
         {/* Recommended Products */}
         <div className="bg-secondary rounded-lg p-3">
-          <div className="flex items-center gap-2 mb-2">
+          <div className="flex items-center gap-2 mb-1">
             <Sparkles className="w-4 h-4 text-amazon-orange" />
-            <h4 className="text-foreground text-sm font-semibold">Recommended Products</h4>
+            <h4 className="text-foreground text-sm font-semibold">Recommended for Your Audience</h4>
           </div>
+          <p className="text-muted-foreground text-[10px] mb-2">Products AI thinks your viewers are most likely to buy. Match % = fit score.</p>
           <div className="space-y-1">
             {recommendedProducts.map((p, i) => (
               <div key={i} className="flex items-center justify-between bg-twitch-panel rounded p-2">
                 <div className="flex items-center gap-2">
-                  <span className="text-muted-foreground text-[10px] font-mono w-4">#{i + 1}</span>
-                  <span className="text-foreground text-xs">{p.name}</span>
+                  <span className="text-foreground text-xs font-medium">{p.name}</span>
                   <span className="text-muted-foreground text-[10px]">{p.price}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-muted-foreground text-[10px]">{p.reason}</span>
-                  <span className="text-[10px] text-success/80">{p.cvr} CVR</span>
-                  <span className="bg-success/20 text-success text-[10px] px-1.5 py-0.5 rounded font-bold">{p.match}%</span>
+                  <span className="bg-success/20 text-success text-[10px] px-1.5 py-0.5 rounded font-bold">{p.match}% match</span>
                 </div>
               </div>
             ))}
@@ -230,12 +215,12 @@ const CreatorDashboard = () => {
 
         {/* Optimal Timing */}
         <div className="bg-secondary rounded-lg p-3">
-          <div className="flex items-center gap-2 mb-2">
+          <div className="flex items-center gap-2 mb-1">
             <Clock className="w-4 h-4 text-success" />
-            <h4 className="text-foreground text-sm font-semibold">Optimal Timing</h4>
+            <h4 className="text-foreground text-sm font-semibold">Best Time to Feature Products</h4>
           </div>
-          <p className="text-muted-foreground text-xs mb-2">
-            Peak conversion at <strong className="text-foreground">45–65 min</strong> into stream. Avoid first 10 min.
+          <p className="text-muted-foreground text-[10px] mb-2">
+            When viewers are most likely to buy during your stream (based on past 20 streams)
           </p>
           <div className="h-28">
             <ResponsiveContainer width="100%" height="100%">
@@ -249,40 +234,37 @@ const CreatorDashboard = () => {
                 <XAxis dataKey="minute" tick={{ fontSize: 9, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} interval={3} />
                 <YAxis hide />
                 <Tooltip content={<CustomTooltip />} />
-                <Area type="monotone" dataKey="engagement" name="Engagement" stroke="hsl(264, 100%, 64%)" fill="url(#engGrad)" strokeWidth={2} />
+                <Area type="monotone" dataKey="engagement" name="Buy Intent" stroke="hsl(264, 100%, 64%)" fill="url(#engGrad)" strokeWidth={2} />
               </AreaChart>
             </ResponsiveContainer>
           </div>
           <div className="flex gap-2 mt-2 text-[10px]">
-            <span className="bg-twitch-purple/20 text-twitch-purple px-2 py-0.5 rounded">⬆ Peak: ~61 min</span>
-            <span className="bg-success/15 text-success px-2 py-0.5 rounded">✓ Best: 45–55 min</span>
-            <span className="bg-destructive/15 text-destructive px-2 py-0.5 rounded">✗ Avoid: 0–10 min</span>
+            <span className="bg-success/15 text-success px-2 py-0.5 rounded">✓ Best window: 45–65 min</span>
+            <span className="bg-destructive/15 text-destructive px-2 py-0.5 rounded">✗ Avoid first 10 min</span>
           </div>
         </div>
 
         {/* Stream Discovery */}
         <div className="bg-secondary rounded-lg p-3">
-          <div className="flex items-center gap-2 mb-2">
+          <div className="flex items-center gap-2 mb-1">
             <TrendingUp className="w-4 h-4 text-twitch-purple" />
-            <h4 className="text-foreground text-sm font-semibold">Stream Discovery</h4>
+            <h4 className="text-foreground text-sm font-semibold">Discovery Boost</h4>
           </div>
-          <div className="grid grid-cols-3 gap-3 mb-2">
+          <p className="text-muted-foreground text-[10px] mb-2">Commerce activity helps Twitch's algorithm recommend your stream to new viewers</p>
+          <div className="grid grid-cols-3 gap-3">
             <div className="bg-twitch-panel rounded-lg p-2 text-center">
               <p className="text-xl font-bold text-twitch-purple">1.35×</p>
-              <p className="text-[10px] text-muted-foreground">Algo Boost</p>
+              <p className="text-[10px] text-muted-foreground">Algorithm boost</p>
             </div>
             <div className="bg-twitch-panel rounded-lg p-2 text-center">
               <p className="text-xl font-bold text-success">25.7%</p>
-              <p className="text-[10px] text-muted-foreground">New Viewers via Commerce</p>
+              <p className="text-[10px] text-muted-foreground">New viewers from commerce</p>
             </div>
             <div className="bg-twitch-panel rounded-lg p-2 text-center">
               <p className="text-xl font-bold text-foreground">+296</p>
-              <p className="text-[10px] text-muted-foreground">Additional Viewers/mo</p>
+              <p className="text-[10px] text-muted-foreground">Extra viewers / month</p>
             </div>
           </div>
-          <p className="text-muted-foreground text-[10px]">
-            Stream-level recommendation only — algorithm surfaces your stream, not specific products.
-          </p>
         </div>
 
         {/* Algorithm Details (collapsible) */}
@@ -291,16 +273,15 @@ const CreatorDashboard = () => {
           className="flex items-center gap-1 text-[11px] text-muted-foreground hover:text-foreground transition-colors w-full"
         >
           {showAlgoDetails ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
-          AI / Algorithms Used
+          How does the AI work?
         </button>
         {showAlgoDetails && (
           <div className="bg-secondary rounded-lg p-3 text-[11px] text-muted-foreground space-y-1.5">
-            <p><strong className="text-foreground">Audience Segmentation:</strong> K-Means clustering (k=4) on demographic vectors</p>
-            <p><strong className="text-foreground">Product Recommendations:</strong> Cosine similarity (audience × product affinity) + Bayesian Wilson score + log-normal price-fit</p>
-            <p><strong className="text-foreground">Optimal Timing:</strong> scipy find_peaks on chat velocity curves + bootstrap CI (n=1000, 20 streams)</p>
-            <p><strong className="text-foreground">Real-time CVR:</strong> Beta-Binomial conjugate model — Prior Beta(2,20), same as Netflix/Amazon A/B testing</p>
-            <p><strong className="text-foreground">Revenue Forecast:</strong> Exponential smoothing (α=0.3) on cumulative purchase timeline</p>
-            <p><strong className="text-foreground">Stream Discovery:</strong> Multiplicative boost model calibrated against TikTok Shop engagement benchmarks</p>
+            <p><strong className="text-foreground">Audience Segments:</strong> K-Means clustering on viewer demographics</p>
+            <p><strong className="text-foreground">Product Matching:</strong> Cosine similarity between audience profile and product categories</p>
+            <p><strong className="text-foreground">Timing Analysis:</strong> Peak detection on chat activity across your last 20 streams</p>
+            <p><strong className="text-foreground">Conversion Tracking:</strong> Bayesian model updating in real-time as viewers buy</p>
+            <p><strong className="text-foreground">Discovery Boost:</strong> Engagement-based algorithm multiplier (similar to TikTok Shop)</p>
           </div>
         )}
       </div>
