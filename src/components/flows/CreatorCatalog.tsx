@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Search, Star, Plus, Upload, Link2, Package } from "lucide-react";
+import { Search, Star, Plus, Upload, Link2, Package, PlusCircle, X, CheckCircle2 } from "lucide-react";
 
 const amazonProducts = [
   { name: "SteelSeries Arctis Nova Pro", price: "$249.99", rating: 4.3, reviews: 2847, commission: "15%", emoji: "🎧" },
@@ -22,6 +22,38 @@ const CreatorCatalog = ({ queued, onAddToQueue }: CreatorCatalogProps) => {
   const filtered = amazonProducts.filter(p =>
     p.name.toLowerCase().includes(search.toLowerCase())
   );
+// Add these state variables at the top of your component function
+  const [ownProducts, setOwnProducts] = useState([
+    { name: "Lisa Lim Logo Hoodie", price: "$45.00", status: "Active", fulfillment: "Amazon FBA", emoji: "👕" },
+    { name: "LisaLim Mousepad XL", price: "$24.99", status: "Active", fulfillment: "Amazon FBA", emoji: "🖱️" },
+    { name: "Signed Poster Bundle", price: "$19.99", status: "Draft", fulfillment: "Pending FBA", emoji: "🖼️" },
+  ]);
+  
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [newProduct, setNewProduct] = useState({ name: "", price: "", emoji: "📦" });
+  const [toastMessage, setToastMessage] = useState("");
+
+  // Function to show our soft popup
+  const showToast = (message) => {
+    setToastMessage(message);
+    setTimeout(() => setToastMessage(""), 3000); // Auto-hides after 3 seconds
+  };
+
+  // Function to save the new product
+  const handleSaveProduct = (e) => {
+    e.preventDefault();
+    if (!newProduct.name || !newProduct.price) return; // Prevent empty saves
+    
+    setOwnProducts([...ownProducts, { 
+      ...newProduct, 
+      status: "Draft", 
+      fulfillment: "Pending FBA" 
+    }]);
+    
+    setIsModalOpen(false); // Close modal
+    setNewProduct({ name: "", price: "", emoji: "📦" }); // Reset form
+    showToast(`Added ${newProduct.name} to your listings!`);
+  };
 
   return (
     <div className="space-y-4">
@@ -96,30 +128,23 @@ const CreatorCatalog = ({ queued, onAddToQueue }: CreatorCatalogProps) => {
       )}
 
       {tab === "own" && (
-        <div className="space-y-4">
+        <div className="space-y-4 relative">
           <div className="bg-twitch-purple/10 border border-twitch-purple/30 rounded-lg p-4">
             <h3 className="text-foreground font-semibold text-sm">List Your Own Products</h3>
             <p className="text-muted-foreground text-xs mt-1">
-              Sell your own merch or brand partnerships. Products are fulfilled through Amazon FBA — ship your inventory to Amazon's warehouse and they handle storage, packing, and delivery.
+              Sell your own merch or brand partnerships. Products are fulfilled through Amazon FBA. Ship your inventory to Amazon's warehouse and they handle storage, packing, and delivery.
             </p>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
+            {/* UPDATED: Add Own Product Button */}
             <button
-              onClick={() => {
-                const ownProducts = [
-                  { name: "Lisa Lim Logo Hoodie", price: "$45.00", rating: 5, reviews: 0, commission: "100%", emoji: "👕" },
-                  { name: "LisaLim Mousepad XL", price: "$24.99", rating: 5, reviews: 0, commission: "100%", emoji: "🖱️" },
-                ];
-                ownProducts.forEach(p => {
-                  if (!queued.some(q => q.name === p.name)) onAddToQueue(p as any);
-                });
-              }}
-              className="bg-twitch-panel border border-border border-dashed rounded-lg p-6 text-center hover:border-twitch-purple transition-colors group"
+              onClick={() => setIsModalOpen(true)}
+              className="bg-twitch-panel border border-border border-dashed rounded-lg p-6 text-center hover:border-twitch-purple transition-colors group cursor-pointer"
             >
-              <Upload className="w-8 h-8 text-muted-foreground mx-auto mb-2 group-hover:text-twitch-purple transition-colors" />
-              <h4 className="text-foreground font-semibold text-sm">Queue All Listed Products</h4>
-              <p className="text-muted-foreground text-xs mt-1">Add all your active listings to the product queue</p>
+              <PlusCircle className="w-8 h-8 text-muted-foreground mx-auto mb-2 group-hover:text-twitch-purple transition-colors" />
+              <h4 className="text-foreground font-semibold text-sm">Create New Product</h4>
+              <p className="text-muted-foreground text-xs mt-1">Draft a new merchandise listing for your store</p>
             </button>
             <button className="bg-twitch-panel border border-border border-dashed rounded-lg p-6 text-center hover:border-twitch-purple transition-colors group">
               <Link2 className="w-8 h-8 text-muted-foreground mx-auto mb-2 group-hover:text-twitch-purple transition-colors" />
@@ -128,14 +153,10 @@ const CreatorCatalog = ({ queued, onAddToQueue }: CreatorCatalogProps) => {
             </button>
           </div>
 
-          {/* Example own products */}
-          <h3 className="text-foreground font-semibold text-sm">Your Listed Products</h3>
+          <h3 className="text-foreground font-semibold text-sm mt-6">Your Listed Products</h3>
           <div className="space-y-2">
-            {[
-              { name: "Lisa Lim Logo Hoodie", price: "$45.00", status: "Active", fulfillment: "Amazon FBA", emoji: "👕" },
-              { name: "LisaLim Mousepad XL", price: "$24.99", status: "Active", fulfillment: "Amazon FBA", emoji: "🖱️" },
-              { name: "Signed Poster Bundle", price: "$19.99", status: "Draft", fulfillment: "Pending FBA", emoji: "🖼️" },
-            ].map((p, i) => (
+            {/* UPDATED: Now mapping over the state variable 'ownProducts' */}
+            {ownProducts.map((p, i) => (
               <div key={i} className="flex items-center gap-3 bg-twitch-panel border border-border rounded-lg p-3">
                 <div className="w-10 h-10 bg-secondary rounded flex items-center justify-center text-lg">{p.emoji}</div>
                 <div className="flex-1">
@@ -148,9 +169,14 @@ const CreatorCatalog = ({ queued, onAddToQueue }: CreatorCatalogProps) => {
                 <button
                   onClick={() => {
                     const product = { name: p.name, price: p.price, rating: 5, reviews: 0, commission: "100%", emoji: p.emoji };
-                    if (!queued.some(q => q.name === p.name)) onAddToQueue(product as any);
+                    if (!queued.some(q => q.name === p.name)) {
+                      onAddToQueue(product as any);
+                      showToast(`Queued ${p.name} for your next stream!`);
+                    } else {
+                      showToast(`${p.name} is already in the queue.`);
+                    }
                   }}
-                  className="bg-twitch-purple/20 text-twitch-purple px-2 py-1 rounded text-xs font-semibold hover:bg-twitch-purple/30 transition-colors"
+                  className="bg-twitch-purple/20 text-twitch-purple px-2 py-1 rounded text-xs font-semibold hover:bg-twitch-purple/30 transition-colors cursor-pointer"
                 >
                   <Plus className="w-3 h-3 inline mr-1" />Queue
                 </button>
