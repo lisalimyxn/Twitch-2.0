@@ -105,10 +105,21 @@ const CreatorCatalog = ({ queued, onAddToQueue }: CreatorCatalogProps) => {
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <button className="bg-twitch-panel border border-border border-dashed rounded-lg p-6 text-center hover:border-twitch-purple transition-colors group">
+            <button
+              onClick={() => {
+                const ownProducts = [
+                  { name: "Lisa Lim Logo Hoodie", price: "$45.00", rating: 5, reviews: 0, commission: "100%", emoji: "👕" },
+                  { name: "LisaLim Mousepad XL", price: "$24.99", rating: 5, reviews: 0, commission: "100%", emoji: "🖱️" },
+                ];
+                ownProducts.forEach(p => {
+                  if (!queued.some(q => q.name === p.name)) onAddToQueue(p as any);
+                });
+              }}
+              className="bg-twitch-panel border border-border border-dashed rounded-lg p-6 text-center hover:border-twitch-purple transition-colors group"
+            >
               <Upload className="w-8 h-8 text-muted-foreground mx-auto mb-2 group-hover:text-twitch-purple transition-colors" />
-              <h4 className="text-foreground font-semibold text-sm">Create New Listing</h4>
-              <p className="text-muted-foreground text-xs mt-1">Upload product details and ship inventory to Amazon FBA</p>
+              <h4 className="text-foreground font-semibold text-sm">Queue All Listed Products</h4>
+              <p className="text-muted-foreground text-xs mt-1">Add all your active listings to the product queue</p>
             </button>
             <button className="bg-twitch-panel border border-border border-dashed rounded-lg p-6 text-center hover:border-twitch-purple transition-colors group">
               <Link2 className="w-8 h-8 text-muted-foreground mx-auto mb-2 group-hover:text-twitch-purple transition-colors" />
