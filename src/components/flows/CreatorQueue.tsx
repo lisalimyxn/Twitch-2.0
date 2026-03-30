@@ -23,25 +23,35 @@ const CreatorQueue = ({ queued, onRemove, onReorder, onGoLive, commerceEnabled, 
   const emojis = ["🎧", "⌨️", "🖱️", "🎧", "🖱️", "⌨️"];
 
   return (
+  <div className="space-y-6">
+    <div className="bg-twitch-panel border border-border rounded-lg p-4 flex items-center justify-between">
+    <div>
+      <h3 className="text-foreground text-lg font-semibold">E-Commerce</h3>
+      <p className="text-muted-foreground text-sm">Toggle shopping features for your stream.</p>
+    </div>
+    <div className="flex items-center gap-3">
+      <span className="text-foreground text-sm font-medium"></span>
+      <button
+        onClick={onToggleCommerce}
+        className={`w-11 h-6 rounded-full relative cursor-pointer transition-colors ${commerceEnabled ? "bg-twitch-purple" : "bg-secondary"}`}
+      >
+        <div className={`absolute top-0.5 w-5 h-5 bg-primary-foreground rounded-full shadow transition-all ${commerceEnabled ? "left-[22px]" : "left-0.5"}`} />
+      </button>
+    </div>
+  </div>
+    
+    {!commerceEnabled && (
+        <div className="bg-destructive/10 border border-destructive/30 rounded-lg p-3 text-sm text-destructive">
+          Commerce is OFF. Product cards won't appear on your stream.
+        </div>
+      )}
+
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="text-foreground text-2xl font-bold">Product Queue</h2>
         <div className="flex items-center gap-3">
-          <span className="text-muted-foreground text-sm">Commerce</span>
-          <button
-            onClick={onToggleCommerce}
-            className={`w-11 h-6 rounded-full relative cursor-pointer transition-colors ${commerceEnabled ? "bg-twitch-purple" : "bg-secondary"}`}
-          >
-            <div className={`absolute top-0.5 w-5 h-5 bg-primary-foreground rounded-full shadow transition-all ${commerceEnabled ? "left-[22px]" : "left-0.5"}`} />
-          </button>
         </div>
       </div>
-
-      {!commerceEnabled && (
-        <div className="bg-destructive/10 border border-destructive/30 rounded-lg p-3 text-sm text-destructive">
-          Commerce is off — product cards won't appear on your stream.
-        </div>
-      )}
 
       <p className="text-muted-foreground text-sm">Products queued for your next stream. Use arrows to reorder. You control when each appears.</p>
 
@@ -91,6 +101,8 @@ const CreatorQueue = ({ queued, onRemove, onReorder, onGoLive, commerceEnabled, 
         </button>
       )}
     </div>
+
+  </div>
   );
 };
 
