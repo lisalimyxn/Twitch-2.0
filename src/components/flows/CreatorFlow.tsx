@@ -26,6 +26,14 @@ const sidebarNav = [
 const CreatorFlow = ({ onBack }: CreatorFlowProps) => {
   const [page, setPage] = useState<CreatorPage>("queue");
   const [queued, setQueued] = useState(products);
+  const [commerceEnabled, setCommerceEnabled] = useState(true);
+
+  const handleReorder = (from: number, to: number) => {
+    const updated = [...queued];
+    const [item] = updated.splice(from, 1);
+    updated.splice(to, 0, item);
+    setQueued(updated);
+  };
 
   if (page === "live") {
     return (
@@ -74,7 +82,10 @@ const CreatorFlow = ({ onBack }: CreatorFlowProps) => {
             <CreatorQueue
               queued={queued}
               onRemove={(i) => setQueued(queued.filter((_, j) => j !== i))}
+              onReorder={handleReorder}
               onGoLive={() => setPage("live")}
+              commerceEnabled={commerceEnabled}
+              onToggleCommerce={() => setCommerceEnabled(!commerceEnabled)}
             />
           )}
           {page === "catalog" && (
